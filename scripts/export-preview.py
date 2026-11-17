@@ -10,8 +10,10 @@ for f in (root/'dist').rglob('*.html'):
  for match in re.finditer(r'<script type="module" src="([^"]+)"></script>',html):
   script=(root/'dist'/match.group(1).lstrip('/')).read_text()
   html=html.replace(match.group(0),'<script type="module">'+script+'</script>')
- image=root/'public/assets/bloom-box.webp'
- html=html.replace('/assets/bloom-box.webp','data:image/webp;base64,'+base64.b64encode(image.read_bytes()).decode())
+ for source in set(re.findall(r'src="(/assets/[^" ]+)"',html)):
+  asset=root/'public'/source.lstrip('/')
+  mime='image/png' if asset.suffix=='.png' else 'image/webp'
+  html=html.replace(source,'data:'+mime+';base64,'+base64.b64encode(asset.read_bytes()).decode())
  pages[route]=html
 payload=json.dumps(pages).replace('</','<\\/')
 preview='''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>I Will Bloom — website design preview</title><style>body{margin:0;background:#fbf9f3;font-family:Arial,sans-serif}#toolbar{padding:10px 18px;display:flex;align-items:center;gap:16px;font-size:12px;background:#404b3c;color:white}#toolbar button{padding:8px 12px;background:#fbf9f3;border:0;color:#31392f;cursor:pointer}iframe{border:0;width:100%;height:calc(100dvh - 55px);display:block}#route{margin-left:auto}</style></head><body><div id="toolbar"><button id="home">Home</button><span>Website design preview · payments inactive</span><span id="route"></span></div><iframe title="I Will Bloom website preview" id="site"></iframe><script id="pages" type="application/json">'''+payload+'''</script><script>
