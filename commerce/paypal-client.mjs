@@ -1,0 +1,13 @@
+// Sandbox-only transport. Credentials and access tokens never enter browser code.
+export function paypalClient({clientId,secret,webhookId,fetchImpl=fetch}){
+ const base='https://api-m.sandbox.paypal.com';let token,until=0;
+ async function access(){if(token&&Date.now()<until)return token;const r=await fetchImpl(base+'/v1/oauth2/token',{method:'POST',headers:{Authorization:'Basic '+Buffer.from(clientId+':'+secret).toString('base64'),'Content-Type':'application/x-www-form-urlencoded'},body:'grant_type=client_credentials',signal:AbortSignal.timeout(20000),redirect:'error'});if(!r.ok)throw new Error('PayPal authentication failed');const data=await r.json();if(!data.access_token)throw new Error('Missing PayPal access token');token=data.access_token;until=Date.now()+Math.max(0,(data.expires_in-60)*1000);return token;}
+ async function request(path,method='GET',body,key,raw=false){const r=await fetchImpl(base+path,{method,headers:{Authorization:'Bearer '+await access(),'Content-Type':'application/json',Prefer:'return=representation',...(key?{'PayPal-Request-Id':key}:{})},...(body!==undefined?{body:raw?body:JSON.stringify(body)}:{}),signal:AbortSignal.timeout(20000),redirect:'error'});if(!r.ok)throw new Error('PayPal request failed');return r.json();}
+ const id=value=>{if(typeof value!=='string'||!/^[A-Z0-9]{10,32}$/i.test(value))throw new Error('Invalid PayPal reference');return value;};
+ return {getCapture:capture=>request('/v2/payments/captures/'+id(capture)),getRefund:refund=>request('/v2/payments/refunds/'+id(refund)),create:(body,key)=>request('/v2/checkout/orders','POST',body,key),get:order=>request('/v2/checkout/orders/'+id(order)),capture:(order,key)=>request('/v2/checkout/orders/'+id(order)+'/capture','POST',{},key),
+  verify:async(raw,headers)=>{const fields={auth_algo:headers['paypal-auth-algo'],cert_url:headers['paypal-cert-url'],transmission_id:headers['paypal-transmission-id'],transmission_sig:headers['paypal-transmission-sig'],transmission_time:headers['paypal-transmission-time'],webhook_id:webhookId};if(Object.values(fields).some(v=>typeof v!=='string'||!v))return false;const cert=new URL(fields.cert_url);if(cert.protocol!=='https:'||!['api.paypal.com','api.sandbox.paypal.com','api-m.sandbox.paypal.com'].includes(cert.hostname))return false;
+   // Preserve the original webhook bytes as the nested event, as required by PayPal.
+   const payload=JSON.stringify(fields).slice(0,-1)+',"webhook_event":'+raw.toString('utf8')+'}';JSON.parse(payload);
+   const result=await request('/v1/notifications/verify-webhook-signature','POST',payload,undefined,true);return result.verification_status==='SUCCESS';}
+ };
+}

@@ -1,0 +1,11 @@
+---
+import Base from '../layouts/Base.astro';
+const commerceOrigin = import.meta.env.PUBLIC_COMMERCE_ORIGIN || '';
+---
+<Base title="PayPal order status" description="Verify the result of your I Will Bloom PayPal checkout."><section class="prose"><p class="eyebrow">I Will Bloom · PayPal test checkout</p><h1>A moment to check your order.</h1><p id="payment-status" role="status" aria-live="polite">This preview does not accept payments. When PayPal is connected, this page will verify your order with the payment service.</p><button id="verify" class="btn" data-origin={commerceOrigin} hidden>Confirm PayPal test payment</button><p><a href="/">Return to I Will Bloom</a></p></section></Base>
+<script>
+const button=document.querySelector('#verify');const message=document.querySelector('#payment-status');const query=new URLSearchParams(location.search);const paypalOrderId=query.get('token'),state=query.get('state');
+// Remove checkout references from the address bar after reading them.
+if(paypalOrderId||state)history.replaceState(null,'',location.pathname);
+if(button?.dataset.origin&&paypalOrderId&&state){button.hidden=false;message.textContent='Confirm your approved PayPal test payment below. The server will complete and verify payment with PayPal.';button.addEventListener('click',async()=>{button.disabled=true;try{const origin=new URL(button.dataset.origin);if(origin.protocol!=='https:')throw new Error('Checkout is not configured.');const response=await fetch(new URL('/api/paypal/capture',origin),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({paypalOrderId,state})});const result=await response.json();if(!response.ok)throw new Error(result.error||'Unable to check payment.');message.textContent=['paid','packing','dispatched'].includes(result.status)?'Your test payment is verified. Thank you. No real payment has been taken in sandbox mode.':result.status==='review'?'Your payment needs a manual check. Please contact Rachel before trying again.':'Your payment is not yet confirmed. Please check again shortly.';}catch(e){message.textContent=e.message||'Unable to check payment. Please contact us before starting another payment.';}finally{button.disabled=false;}});}
+</script>
