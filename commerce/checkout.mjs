@@ -16,7 +16,7 @@ export function checkoutParameters(input, config) {
     shipping_options:[{shipping_rate_data:{type:'fixed_amount',fixed_amount:{amount:region.shippingCents,currency:'eur'},display_name:region.displayName}}],
     automatic_tax:{enabled:false},
     success_url:new URL('/order-received/?session_id={CHECKOUT_SESSION_ID}',origin).href.replace('%7BCHECKOUT_SESSION_ID%7D','{CHECKOUT_SESSION_ID}'),
-    cancel_url:new URL('/#shop',origin).href,
+    cancel_url:new URL('/journal/#order',origin).href,
     metadata:{sku:'iwb-journal',quantity:String(input.quantity),region:input.region}
   };
 }

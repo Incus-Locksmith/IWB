@@ -27,3 +27,9 @@ Astro static redirects are provided for /reserve and /product-page/toiletry-bag.
 ## Remaining migration work
 
 Obtain a complete Wix URL/sitemap inventory; recover existing blog articles and professional endorsements with exact attribution; verify professional-resource text; finalise seller/legal/returns/privacy details; check all image alternative text and mobile layouts. The preview remains noindex and payments remain disconnected.
+
+## 18 November migration update
+
+The indexed homepage, legacy product, reserve, contact and founder-letter pages were checked again. The original sitemap remains unavailable from this environment. The current preview has the owner's product photographs, inside-page gallery, lotus and portrait. The published Seamus excerpt is available on the testimonials page. The Bloom Library previews three new articles pending recovery of the Wix archive.
+
+Public indexing is disabled by default. IWB_PUBLIC_INDEX=true enables the public sitemap and removes the preview indexing guards from editorial and product pages. Keep it unset on staging and set it only as part of the approved cutover. For HTTP 301s, configure Cloudflare redirects for both legacy routes before cutover. Render redirect rules run only when the source has no matching static resource, and Astro currently builds HTML fallbacks at those paths.

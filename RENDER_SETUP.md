@@ -14,7 +14,7 @@ The static design preview is deployed at https://iwb-preview.onrender.com/ . Aut
 - Node version: 24.
 - Automatic deploy: off; update the preview only after deliberate review.
 - Leave `PUBLIC_COMMERCE_ORIGIN` unset until the sandbox backend is ready.
-- `PUBLIC_PAYMENT_PROVIDER=paypal` when test checkout is connected.
+- `PUBLIC_PAYMENT_PROVIDER=stripe` when test checkout is connected.
 - The code intentionally blocks indexing during development. This does not make a hosted preview private; access controls need to be selected before deployment if private staging is required.
 
 ## Commerce sandbox service
@@ -28,15 +28,15 @@ The static design preview is deployed at https://iwb-preview.onrender.com/ . Aut
 - Verify hosting/database plan, cost, retention and backup arrangements before provisioning.
 - Default checkout closed; initial stock zero. Actual stock must be entered after verification.
 
-Enter secrets directly in protected hosting settings, not GitHub files: DATABASE_URL, PAYPAL_CLIENT_SECRET, PAYPAL_STATE_SECRET and ADMIN_TOKEN. Configure the remaining variable names from `.env.example`. No Stripe account is required in PayPal mode. The developer app exists according to the owner; its credentials have not been connected or tested.
+Enter DATABASE_URL, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET and ADMIN_TOKEN in protected hosting settings. Start with an approved Stripe test account and a test webhook; keep checkout disabled until the sandbox is ready.
 
-Set exact sandbox frontend/backend origins, receiving sandbox merchant ID and webhook ID before testing. Bind the PayPal webhook to `/api/paypal/webhook` once the HTTPS endpoint is available. See commerce/README.md for events, verification, reconciliation and operational limits.
+Set exact sandbox frontend/backend origins. Bind the test webhook to `/api/stripe/webhook` once the HTTPS endpoint is available. See commerce/README.md for events, verification, reconciliation and operational limits.
 
 ## Approval gates
 
 Before provisioning any paid resource, show the selected plan and cost for approval. Before publishing the replacement website or changing the existing domain, obtain explicit launch approval. Keep the current Wix website active throughout development.
 
-Required remaining checks: final design/content and product photography, seller/legal/delivery/tax details, actual PayPal sandbox transactions, email delivery, administration security, real PostgreSQL concurrency, and browser QA.
+Required remaining checks: final design/content and product photography, seller/legal/delivery/tax details, actual Stripe sandbox transactions, email delivery, administration security, real PostgreSQL concurrency, and browser QA.
 
 ## Preview verification
 

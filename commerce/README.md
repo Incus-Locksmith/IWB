@@ -55,3 +55,7 @@ PayPal reconciliation reads known provider orders; only a confirmed VOIDED order
 The order desk continues to work with both provider types. Notification delivery and live account integration remain outstanding. Before launch: connect the intended merchant account with approval, verify business eligibility and receiving details, test approval/cancellation/capture/pending/refund flows with a sandbox buyer, then separately review live configuration and obtain publication approval. Card or guest payment availability must be checked for the account; do not promise it to customers until verified.
 
 PayPal references: https://developer.paypal.com/api/orders/v2 ; https://developer.paypal.com/api/rest/requests/ ; https://developer.paypal.com/api/rest/webhooks/rest/ .
+
+## Current storefront direction
+
+Stripe is the default for the 18 November website brief. The PayPal sandbox adapter remains available for an explicitly configured fallback. The storefront now starts checkout from /journal/ and estimates postage for one journal at a time. Keep all provider credentials disconnected from the design preview.
